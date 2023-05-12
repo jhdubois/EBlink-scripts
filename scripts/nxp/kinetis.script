@@ -13,7 +13,7 @@ const mem_template = @@"
 <?xml version=\"1.0\"?>
 <memory-map>
  <memory type=\"rom\" start=\"0x1C000000\" length=\"0x8000\"/>
- <memory type=\"ram\" start=\"0x20000000\" length=\"0x%x\"/>
+ <memory type=\"ram\" start=\"0x1FFF8000\" length=\"0x%x\"/>
  <memory type=\"flash\" start=\"0x00000000\" length=\"0x%x\">
   <property name=\"blocksize\">0x%x</property>
   <property name=\"secstart\">0</property>
@@ -83,7 +83,7 @@ function kinetis_device()
 			if (((deviceId & 0xF0000000) >> 28) == KINETISKCONFIG[i][0]) {
 				deviceStr = KINETISKCONFIG[i][1]
 				for (local j=0;i<KINETISKCONFIG.len();i++) {
-					if (((deviceId & 0x0F0000000) >> 24) == KINETISKCONFIG[i][0]) {
+					if (((deviceId & 0x0F000000) >> 24) == KINETISKCONFIG[i][0]) {
 						deviceStr += KINETISKCONFIG[i][1];
 						break;
 					}
