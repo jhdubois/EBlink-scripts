@@ -15,6 +15,7 @@ const FTFA_FCCOB 0x40020004
 
 const FCMD_PROGRAMLWORD  (0x06 << 24)
 const FCMD_ERASEFLASHSEC (0x09 << 24)
+const FCMD_ERASEALLBLKS  (0x44 << 24)
 const FCMD_ERASEALLBLKSU (0x49 << 24)
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ function flash_erase(sector, address)
 
     try {
 
-		executeFTFA(FCMD_ERASEFLASHSEC | (address & 0x0FFFFF))
+		executeFTFA(FCMD_ERASEFLASHSEC | (address & 0x00FFFFFF))
 
 		return ERROR_OK
     }
@@ -113,7 +114,11 @@ function flash_erase_chip()
 {
     try {
 
-		executeFTFA(FCMD_ERASEALLBLKSU)
+		_n_throw( executeFTFA(FCMD_ERASEALLBLKS) )
+	
+		// Set the FSEC register to unsecured
+		
+		executeFTFA((FCMD_PROGRAMLWORD | 0x0000040C),0xFFFFFFFE)
 		
 		return ERROR_OK
     }

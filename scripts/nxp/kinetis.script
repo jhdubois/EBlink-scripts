@@ -58,10 +58,14 @@ RAMCONFIG <- [
 
 // FLASH size
 FLASHCONFIG <- [
+    [0x03000000, 32*1024],
 	[0x05000000, 64*1024],
 	[0x06000000, 128*1024],
+	[0x07000000, 128*1024],
 	[0x09000000, 256*1024],
 	[0x0B000000, 512*1024],
+	[0x0D000000, 1024*1024],
+	[0x0F000000, 128*1024],
 ]
 
 const SIM_FCFG1     0x4007504C	// Flash Configuration Register 1
@@ -78,14 +82,30 @@ function kinetis_device()
     local deviceStr = ""
 
 	// Read device type
+	if (deviceId < 0x407F) {
+
+		if (deviceId & 0x10) deviceStr = "MK20"
+		else deviceStr = "MK10"
+
+		// Set sector size
+		page_size = 1024
+		
+		// Read RAM size
+		if ((deviceId & 0xFF) == 0x02) ram_size = 0x2000
+		else ram_size = 0x4000
+
+		// Read FLASH size
+		_n_throw(intrfApi.readMem32(SIM_FCFG1_L2B))
+	}
+	else {
 	if ((deviceId & 0x00F00000) == 0x0) {
 		for (local i=0;i<KINETISKCONFIG.len();i++) {
 			if (((deviceId & 0xF0000000) >> 28) == KINETISKCONFIG[i][0]) {
-				deviceStr = KINETISKCONFIG[i][1]
+					deviceStr = "K" + KINETISKCONFIG[i][1]
 				for (local j=0;i<KINETISKCONFIG.len();i++) {
 					if (((deviceId & 0x0F000000) >> 24) == KINETISKCONFIG[i][0]) {
-						deviceStr += KINETISKCONFIG[i][1];
-						break;
+							deviceStr += KINETISKCONFIG[i][1]
+							break
 					}
 				}
 				break
@@ -95,7 +115,7 @@ function kinetis_device()
 	else {
 		for (local i=0;i<KINETISLCONFIG.len();i++) {
 			if ((deviceId & 0xF0000000) == KINETISLCONFIG[i][0]) {
-				deviceStr = KINETISLCONFIG[i][1]
+					deviceStr = "K" + KINETISLCONFIG[i][1]
 				break
 			}
 		}
@@ -106,15 +126,16 @@ function kinetis_device()
 	for (local i=0;i<RAMCONFIG.len();i++) {
 		if ((deviceId & 0x000F0000) == RAMCONFIG[i][0]) {
 			ram_size = RAMCONFIG[i][1]
-			break;
+				break
 		}
 	}
 	
-	if (ram_size == 0) throw ERROR_NOT_FOUND
-	
 	// Read FLASH size
-	if (deviceStr == "32L2B") _n_throw(intrfApi.readMem32(SIM_FCFG1_L2B))
+		if (deviceStr == "K32L2B") _n_throw(intrfApi.readMem32(SIM_FCFG1_L2B))
 	else _n_throw(intrfApi.readMem32(SIM_FCFG1))
+	}
+	
+	if (ram_size == 0) throw ERROR_NOT_FOUND
 
 	for (local i=0;i<FLASHCONFIG.len();i++) {
 		if ((intrfApi.value32 & 0x0F000000) == FLASHCONFIG[i][0]) flash_size = FLASHCONFIG[i][1]
@@ -123,7 +144,7 @@ function kinetis_device()
 	if (flash_size == 0) throw ERROR_NOT_FOUND
 	
     // Inform user of the device found
-    printf("NXP Kinetis family : K%s\n", deviceStr)
+    printf("NXP Kinetis family : %s\n", deviceStr)
 
     // Inform the user
     printf("Detected FLASH : 0x%X\nConfigured RAM : 0x%X\n", flash_size, ram_size)
