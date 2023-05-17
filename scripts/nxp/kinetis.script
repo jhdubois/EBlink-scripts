@@ -28,7 +28,7 @@ const mem_template = @@"
 
 ram_size <- 0
 flash_size <- 0
-page_size <- 2048
+page_size <- 1024
 
 // Device Type
 KINETISLCONFIG <- [
@@ -87,9 +87,6 @@ function kinetis_device()
 		if (deviceId & 0x10) deviceStr = "MK20"
 		else deviceStr = "MK10"
 
-		// Set sector size
-		page_size = 1024
-		
 		// Read RAM size
 		if ((deviceId & 0xFF) == 0x02) ram_size = 0x2000
 		else ram_size = 0x4000
@@ -133,6 +130,11 @@ function kinetis_device()
 	// Read FLASH size
 		if (deviceStr == "K32L2B") _n_throw(intrfApi.readMem32(SIM_FCFG1_L2B))
 	else _n_throw(intrfApi.readMem32(SIM_FCFG1))
+		
+		// Set FLASH sector size (if not default: 1024)
+		
+		if (deviceStr == "K32L2A") page_size = 2048
+		
 	}
 	
 	if (ram_size == 0) throw ERROR_NOT_FOUND
