@@ -114,7 +114,7 @@ function flash_write(sector, address, buffer)
 
 		// We can only write in blocks of 256, 512, 1024, or 4096 bytes
 
-		if (writeSize < 256) writeSize == 256;
+		if (writeSize < 256) writeSize = 256;
 		else if (writeSize < 512) writeSize = 512;
 		else if (writeSize < 1024) writeSize = 1024;
 		else writeSize = 4096;

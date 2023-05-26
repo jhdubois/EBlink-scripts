@@ -131,10 +131,9 @@ function readLPCDeviceID()
 
    // Try to read a DEVICE_ID register
 	
-   for (local i=0;i<NXP_DEVICEID.len();i++) {
-   	_n_throw(intrfApi.readMem32(NXP_DEVICEID[i]))
+   for (local i=0;i<NXP_LPC_DEVICEID.len();i++) {
+   	_n_throw(intrfApi.readMem32(NXP_LPC_DEVICEID[i]))
 	if (intrfApi.value32 >= 0x00007000 && intrfApi.value32 <= 0x46000000) {
-		printf("Device ID found! (%X)\n",intrfApi.value32)
 		return(intrfApi.value32)
 	}
    }
